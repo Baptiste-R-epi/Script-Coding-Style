@@ -7,7 +7,7 @@ const IGNORED_FOLDER = [
 
 const REPLACE = [
 	"/(\w+ \**\w+\([\w\s,*]+\))\s*{/" => "$1\n{",						// put function braces at a new line
-	"@(\t+.*?)//.*@" => "",												// delete coms:// at end of line starting with tabs
+	"@(\t+.*?)//.*@" => "$1",											// delete coms:// at end of line starting with tabs
 	"/[^\S\n]*(for|if|while)\s*(\([^{}]*\))\s*{\s*}[^\S\n]*\n/" => "",	// delete empty for/if/while
 	"/(for|if|while)\s*(\([^{}]*\))\s*{/" => "$1 $2 {",					// put for/if/while braces at the end of line
 	"/}\s*else\s*({?)/" => "} else $1",									// manage else braces including else if : } else {
@@ -35,11 +35,13 @@ function get_all_files($path) {
 
 $all_files = get_all_files(".");
 
-
 foreach ($all_files as $file_path) {
-	$content = file_get_contents($file_path);
-	foreach (REPLACE as $regex => $replace) {
-		$content = preg_replace($regex, $replace, $content);
-	}
-	file_put_contents($file_path, $content);
+	file_put_contents(
+		$file_path,
+		preg_replace(
+			array_keys(REPLACE),
+			array_values(REPLACE),
+			file_get_contents($file_path)
+		)
+	);
 }
